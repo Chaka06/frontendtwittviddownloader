@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta property="og:title" content="FAQ - TVID.pro">
+    <meta property="og:description" content="Foire aux questions TVID.pro">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>📥</text></svg>">
+    <title>FAQ - TVID.pro</title>
+    <style>
+        :root {
+            --primary-color: #1DA1F2;
+            --primary-dark: #1991da;
+            --dark-bg: #0a0c10;
+            --darker-bg: #16181c;
+            --text-color: #fff;
+            --accent-gradient: linear-gradient(45deg, #1DA1F2, #19c1da);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'SF Pro Display', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        html {
+            background: linear-gradient(-45deg, #0a0c10, #16181c, #1a1e23, #20242a);
+            background-size: 400% 400%;
+            min-height: 100%;
+        }
+
+        body {
+            background: none;
+            min-height: 100vh;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+            color: var(--text-color);
+        }
+
+        /* Header Styles */
+        .main-header {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background-color: rgba(22, 24, 28, 0.95);
+            backdrop-filter: blur(10px);
+            z-index: 1000;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid rgba(48, 52, 58, 0.95);
+        }
+
+        .header-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo-text {
+            font-size: 1.5rem;
+            font-weight: 700;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .nav-menu {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: opacity 0.2s;
+        }
+
+        .nav-link:hover {
+            opacity: 0.8;
+        }
+
+        /* FAQ Content Styles */
+        .faq-container {
+            max-width: 800px;
+            margin: 6rem auto 2rem;
+            padding: 0 1rem;
+            flex: 1;
+        }
+
+        .faq-title {
+            font-size: 2.5rem;
+            text-align: center;
+            margin-bottom: 3rem;
+            background: var(--accent-gradient);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .faq-section {
+            background-color: rgba(22, 24, 28, 0.95);
+            border: 1px solid rgba(48, 52, 58, 0.95);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            transition: transform 0.2s ease;
+        }
+
+        .faq-section:hover {
+            transform: translateY(-2px);
+        }
+
+        .faq-question {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .faq-answer {
+            color: #8899A6;
+            line-height: 1.6;
+        }
+
+        /* Footer Styles */
+        .footer {
+            margin-top: auto;
+            background-color: rgba(22, 24, 28, 0.95);
+            border-top: 1px solid rgba(48, 52, 58, 0.95);
+            padding: 2rem;
+            width: 100%;
+        }
+
+        .footer-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .social-links {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .copyright {
+            text-align: center;
+            margin-top: 2rem;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 768px) {
+            .nav-menu {
+                gap: 1rem;
+            }
+            
+            .footer-container {
+                flex-direction: column;
+                gap: 1.5rem;
+                text-align: center;
+            }
+            
+            .footer-links {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .faq-container {
+                margin-top: 5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-container">
+                <a href="index.html" style="text-decoration: none; display: flex; align-items: center; gap: 0.5rem; color: inherit;">
+                    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                        <polyline points="7 10 12 15 17 10"/>
+                        <line x1="12" y1="15" x2="12" y2="3"/>
+                    </svg>
+                    <span class="logo-text">TVID.pro</span>
+                </a>
+            </div>
+            <nav class="nav-menu">
+                <a href="about.html" class="nav-link">À propos</a>
+                <a href="FAQ.html" class="nav-link">FAQ</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- FAQ Content -->
+    <main class="faq-container">
+        <h1 class="faq-title">Foire aux questions</h1>
+
+        <div class="faq-section">
+            <h2 class="faq-question">À quoi sert TVID.pro ?</h2>
+            <p class="faq-answer">TVID.pro est un outil qui vous permet de télécharger facilement des vidéos depuis la plateforme X (anciennement Twitter) directement sur votre appareil. Notre service offre un téléchargement rapide et de haute qualité au format MP4, garantissant une excellente qualité de lecture.</p>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-question">Comment utiliser TVID.pro ?</h2>
+            <p class="faq-answer">L'utilisation est très simple : collez simplement l'URL de la vidéo X que vous souhaitez télécharger dans le champ prévu à cet effet, puis cliquez sur le bouton "Charger les vidéos". Sélectionnez ensuite la qualité souhaitée et cliquez sur "Télécharger". La vidéo sera automatiquement sauvegardée sur votre appareil.</p>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-question">Quels formats de fichiers sont supportés ?</h2>
+            <p class="faq-answer">TVID.pro supporte le téléchargement de vidéos au format MP4 et de GIFs animés. Pour les vidéos, vous pouvez choisir différentes qualités selon vos besoins, de la qualité standard (SD) à la haute définition (HD).</p>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-question">Est-ce que TVID.pro est gratuit ?</h2>
+            <p class="faq-answer">Oui, TVID.pro est entièrement gratuit ! Nous nous engageons à fournir un service de qualité accessible à tous, sans frais cachés ni abonnement requis.</p>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-question">Sur quels appareils puis-je utiliser TVID.pro ?</h2>
+            <p class="faq-answer">TVID.pro est compatible avec tous les appareils modernes : ordinateurs, smartphones et tablettes. Il fonctionne sur iOS, Android, Windows, Mac et Linux, directement depuis votre navigateur web.</p>
+        </div>
+
+        <div class="faq-section">
+            <h2 class="faq-question">Les vidéos téléchargées conservent-elles leur qualité d'origine ?</h2>
+            <p class="faq-answer">Oui, TVID.pro permet de télécharger les vidéos dans leur qualité d'origine. Nous proposons différentes options de qualité pour vous permettre de choisir le meilleur compromis entre la taille du fichier et la qualité visuelle.</p>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="footer-container">
+            <div class="footer-logo">
+                <span class="logo-text">TVID.pro</span>
+            </div>
+            <div class="footer-links">
+                <a href="about.html" class="nav-link">À propos</a>
+                <a href="FAQ.html" class="nav-link">FAQ</a>
+            </div>
+            <div class="social-links">
+                <a href="#" class="social-link">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21.633 2.367a1.6 1.6 0 0 0-1.633.09L2.89 11.15a1.6 1.6 0 0 0 .043 2.84l4.83 2.023L18.12 6.66l-9.997 9.997v4.043a1.6 1.6 0 0 0 2.83 1.033L14.22 18.2l4.83 2.023a1.6 1.6 0 0 0 2.18-1.073l2.4-14.4a1.6 1.6 0 0 0-1.997-2.383z"/>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <div class="copyright">
+            © 2024 TVID.pro. Tous droits réservés.
+        </div>
+    </footer>
+</body>
+</html>

@@ -814,22 +814,54 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
         `;
         downloadButton.disabled = true;
 
-        // Pour Mobile Safari
+        // Pour Mobile Safari (iOS)
         if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
-            window.location.href = videoUrl;
+            try {
+                const response = await fetch(videoUrl);
+                const blob = await response.blob();
+                const url = window.URL.createObjectURL(blob);
+                
+                // Créer un élément HTML pour le téléchargement
+                const downloadLink = document.createElement('a');
+                downloadLink.style.display = 'none';
+                downloadLink.href = url;
+                downloadLink.download = `x-media-${quality}-${index}${extension}`;
+                
+                // Ajouter un message d'instruction pour iOS
+                const iosInstructions = document.createElement('div');
+                iosInstructions.innerHTML = `
+                    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                               background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 9999;
+                               color: white; text-align: center; max-width: 80%;">
+                        <p>Pour sauvegarder la vidéo :</p>
+                        <p>1. Appuyez longuement sur la vidéo</p>
+                        <p>2. Sélectionnez "Télécharger la vidéo"</p>
+                        <button onclick="this.parentElement.remove()" 
+                                style="background: #1DA1F2; border: none; color: white; 
+                                       padding: 10px 20px; border-radius: 5px; margin-top: 10px;">
+                            Compris
+                        </button>
+                    </div>
+                `;
+                document.body.appendChild(iosInstructions);
+                
+                // Ajouter le lien et déclencher le clic
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Nettoyer
+                setTimeout(() => {
+                    window.URL.revokeObjectURL(url);
+                    downloadLink.remove();
+                }, 100);
+            } catch (error) {
+                console.error('Erreur iOS:', error);
+                alert('Erreur lors du téléchargement. Veuillez réessayer.');
+            }
             downloadButton.innerHTML = originalText;
             downloadButton.disabled = false;
             return;
         }
-
-        const response = await fetch(videoUrl);
-        
-        if (!response.ok) {
-            throw new Error('Erreur lors du téléchargement');
-        }
-
-        const blob = await response.blob();
-        const extension = quality === 'photo' ? '.jpg' : type === 'animated_gif' ? '.gif' : '.mp4';
         
         // Pour les appareils mobiles Android
         if (/Android/.test(navigator.userAgent)) {

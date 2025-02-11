@@ -647,7 +647,7 @@ body {
     
 
    <script>
-    const tweetUrlInput = document.getElementById('tweetUrl');
+   const tweetUrlInput = document.getElementById('tweetUrl');
 const downloadBtn = document.getElementById('downloadBtn');
 const urlError = document.getElementById('urlError');
 const result = document.getElementById('result');
@@ -823,44 +823,91 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
         // Pour iOS
         if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
             try {
-                // Préparer l'en-tête Content-Disposition pour forcer le téléchargement
+                // Créer le nom du fichier
                 const fileName = `x-media-${quality}-${index}${extension}`;
-                const cleanedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
                 
-                // Créer une nouvelle requête avec les en-têtes appropriés
-                const downloadResponse = await fetch(videoUrl, {
-                    headers: {
-                        'Content-Type': response.headers.get('content-type') || 'video/mp4',
-                        'Content-Disposition': `attachment; filename="${cleanedFileName}"`,
-                    }
+                // Créer un fichier à partir du blob
+                const file = new File([blob], fileName, { 
+                    type: response.headers.get('content-type') || 'video/mp4'
                 });
 
-                if (!downloadResponse.ok) throw new Error('Erreur de téléchargement');
-
-                // Créer un blob avec le bon type MIME
-                const downloadBlob = await downloadResponse.blob();
-                const blobUrl = URL.createObjectURL(downloadBlob);
-
-                // Créer un lien de téléchargement
-                const downloadLink = document.createElement('a');
-                downloadLink.style.display = 'none';
-                downloadLink.href = blobUrl;
-                downloadLink.download = cleanedFileName;
-                downloadLink.setAttribute('target', '_blank');
-                
-                // Ajouter temporairement à la page et cliquer
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                
-                // Nettoyer
-                setTimeout(() => {
-                    URL.revokeObjectURL(blobUrl);
-                    document.body.removeChild(downloadLink);
-                }, 100);
+                // Utiliser l'API de partage pour demander la permission
+                if (navigator.share && navigator.canShare && navigator.canShare({ files: [file] })) {
+                    await navigator.share({
+                        files: [file],
+                        title: fileName,
+                    });
+                } else {
+                    // Fallback si l'API de partage n'est pas disponible
+                    const blobUrl = URL.createObjectURL(blob);
+                    
+                    // Créer une boîte de dialogue de confirmation
+                    const confirmDialog = document.createElement('div');
+                    confirmDialog.style.cssText = `
+                        position: fixed;
+                        top: 50%;
+                        left: 50%;
+                        transform: translate(-50%, -50%);
+                        background: rgba(0, 0, 0, 0.95);
+                        padding: 20px;
+                        border-radius: 12px;
+                        z-index: 10000;
+                        text-align: center;
+                        color: white;
+                        width: 90%;
+                        max-width: 350px;
+                        box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                    `;
+                    
+                    confirmDialog.innerHTML = `
+                        <div style="font-size: 18px; margin-bottom: 15px;">Autoriser le téléchargement ?</div>
+                        <div style="margin-bottom: 20px; font-size: 14px;">
+                            Voulez-vous télécharger le fichier "${fileName}" ?
+                        </div>
+                        <div style="display: flex; gap: 10px; justify-content: center;">
+                            <button id="denyDownload" style="
+                                background: #666;
+                                border: none;
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                            ">Refuser</button>
+                            <button id="allowDownload" style="
+                                background: #1DA1F2;
+                                border: none;
+                                color: white;
+                                padding: 10px 20px;
+                                border-radius: 6px;
+                                cursor: pointer;
+                            ">Autoriser</button>
+                        </div>
+                    `;
+                    
+                    document.body.appendChild(confirmDialog);
+                    
+                    // Gérer les actions de l'utilisateur
+                    return new Promise((resolve) => {
+                        document.getElementById('allowDownload').onclick = () => {
+                            const a = document.createElement('a');
+                            a.href = blobUrl;
+                            a.download = fileName;
+                            a.click();
+                            confirmDialog.remove();
+                            URL.revokeObjectURL(blobUrl);
+                            resolve();
+                        };
+                        
+                        document.getElementById('denyDownload').onclick = () => {
+                            confirmDialog.remove();
+                            URL.revokeObjectURL(blobUrl);
+                            resolve();
+                        };
+                    });
+                }
             } catch (error) {
                 console.error('Erreur iOS:', error);
-                // Fallback: ouvrir directement l'URL
-                window.location.href = videoUrl;
+                alert('Erreur lors du téléchargement. Veuillez réessayer.');
             }
         } 
         // Pour Android

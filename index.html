@@ -822,84 +822,46 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
 
         // Pour iOS
         if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
-            // Créer un conteneur pour la vidéo
-            const videoContainer = document.createElement('div');
-            videoContainer.style.cssText = `
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background: rgba(0, 0, 0, 0.9);
-                z-index: 999999;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-            `;
+            try {
+                // Préparer l'en-tête Content-Disposition pour forcer le téléchargement
+                const fileName = `x-media-${quality}-${index}${extension}`;
+                const cleanedFileName = fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+                
+                // Créer une nouvelle requête avec les en-têtes appropriés
+                const downloadResponse = await fetch(videoUrl, {
+                    headers: {
+                        'Content-Type': response.headers.get('content-type') || 'video/mp4',
+                        'Content-Disposition': `attachment; filename="${cleanedFileName}"`,
+                    }
+                });
 
-            // Créer l'élément vidéo
-            const videoElement = document.createElement('video');
-            videoElement.controls = true;
-            videoElement.playsInline = true;
-            videoElement.autoplay = false;
-            videoElement.style.cssText = `
-                max-width: 90%;
-                max-height: 70vh;
-                margin: 20px;
-            `;
+                if (!downloadResponse.ok) throw new Error('Erreur de téléchargement');
 
-            // Créer l'URL du blob et configurer la source
-            const blobUrl = URL.createObjectURL(blob);
-            videoElement.src = blobUrl;
+                // Créer un blob avec le bon type MIME
+                const downloadBlob = await downloadResponse.blob();
+                const blobUrl = URL.createObjectURL(downloadBlob);
 
-            // Instructions
-            const instructions = document.createElement('div');
-            instructions.style.cssText = `
-                color: white;
-                text-align: center;
-                padding: 20px;
-                font-size: 16px;
-                max-width: 90%;
-            `;
-            instructions.innerHTML = `
-                <p style="margin: 10px 0;">Pour enregistrer la vidéo :</p>
-                <p style="margin: 10px 0;">1. Appuyez sur la vidéo pour l'afficher en plein écran</p>
-                <p style="margin: 10px 0;">2. Appuyez sur <strong>⋮</strong> ou <strong>Partager</strong></p>
-                <p style="margin: 10px 0;">3. Choisissez "Télécharger la vidéo"</p>
-            `;
-
-            // Bouton de fermeture
-            const closeButton = document.createElement('button');
-            closeButton.textContent = 'Fermer';
-            closeButton.style.cssText = `
-                background: #1DA1F2;
-                border: none;
-                color: white;
-                padding: 12px 24px;
-                border-radius: 6px;
-                margin-top: 20px;
-                font-size: 16px;
-                cursor: pointer;
-            `;
-            closeButton.onclick = () => {
-                videoContainer.remove();
-                URL.revokeObjectURL(blobUrl);
-            };
-
-            // Assembler les éléments
-            videoContainer.appendChild(videoElement);
-            videoContainer.appendChild(instructions);
-            videoContainer.appendChild(closeButton);
-            document.body.appendChild(videoContainer);
-
-            // Supprimer après 5 minutes si l'utilisateur n'a pas fermé
-            setTimeout(() => {
-                if (document.body.contains(videoContainer)) {
-                    videoContainer.remove();
+                // Créer un lien de téléchargement
+                const downloadLink = document.createElement('a');
+                downloadLink.style.display = 'none';
+                downloadLink.href = blobUrl;
+                downloadLink.download = cleanedFileName;
+                downloadLink.setAttribute('target', '_blank');
+                
+                // Ajouter temporairement à la page et cliquer
+                document.body.appendChild(downloadLink);
+                downloadLink.click();
+                
+                // Nettoyer
+                setTimeout(() => {
                     URL.revokeObjectURL(blobUrl);
-                }
-            }, 300000);
+                    document.body.removeChild(downloadLink);
+                }, 100);
+            } catch (error) {
+                console.error('Erreur iOS:', error);
+                // Fallback: ouvrir directement l'URL
+                window.location.href = videoUrl;
+            }
         } 
         // Pour Android
         else if (/Android/.test(navigator.userAgent)) {

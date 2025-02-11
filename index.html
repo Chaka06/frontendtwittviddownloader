@@ -804,6 +804,8 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
     try {
         const downloadButton = event.target.closest('.btn');
         const originalText = downloadButton.innerHTML;
+        const extension = type === 'photo' ? '.jpg' : type === 'animated_gif' ? '.gif' : '.mp4';
+        
         downloadButton.innerHTML = `
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
                  style="animation: spin 1s linear infinite;">
@@ -814,61 +816,64 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
         `;
         downloadButton.disabled = true;
 
-        // Pour Mobile Safari (iOS)
+        const response = await fetch(videoUrl);
+        if (!response.ok) throw new Error('Erreur lors du téléchargement');
+        const blob = await response.blob();
+
+        // Pour iOS
         if (/iPhone|iPad|iPod/.test(navigator.userAgent) && !window.MSStream) {
+            const fileName = `x-media-${quality}-${index}${extension}`;
+            const file = new File([blob], fileName, { type: response.headers.get('content-type') });
+            
+            // Créer l'URL du blob
+            const blobUrl = URL.createObjectURL(blob);
+            
+            // Créer une iframe invisible pour le téléchargement
+            const iframe = document.createElement('iframe');
+            iframe.style.display = 'none';
+            document.body.appendChild(iframe);
+            
+            // Écrire le contenu dans l'iframe
+            iframe.contentWindow.document.open();
+            iframe.contentWindow.document.write(`
+                <a id="downloadLink" href="${blobUrl}" download="${fileName}">Download</a>
+                <video id="videoPreview" controls style="width: 100%; max-width: 600px;" playsinline>
+                    <source src="${blobUrl}" type="${file.type}">
+                </video>
+            `);
+            iframe.contentWindow.document.close();
+
+            // Afficher les instructions
+            const instructions = document.createElement('div');
+            instructions.innerHTML = `
+                <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
+                           background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 9999;
+                           color: white; text-align: center; max-width: 80%;">
+                    <p>Pour sauvegarder la vidéo :</p>
+                    <p>1. Appuyez sur la vidéo pour la lancer</p>
+                    <p>2. Maintenez appuyé sur la vidéo</p>
+                    <p>3. Sélectionnez "Télécharger la vidéo"</p>
+                    <button onclick="this.parentElement.remove()" 
+                            style="background: #1DA1F2; border: none; color: white; 
+                                   padding: 10px 20px; border-radius: 5px; margin-top: 10px;">
+                        Compris
+                    </button>
+                </div>
+            `;
+            document.body.appendChild(instructions);
+
+            // Nettoyer après un délai
+            setTimeout(() => {
+                URL.revokeObjectURL(blobUrl);
+                iframe.remove();
+            }, 300000); // 5 minutes
+        } 
+        // Pour Android
+        else if (/Android/.test(navigator.userAgent)) {
+            const fileName = `x-media-${quality}-${index}${extension}`;
+            const file = new File([blob], fileName, { type: response.headers.get('content-type') });
+            
             try {
-                const response = await fetch(videoUrl);
-                const blob = await response.blob();
-                const url = window.URL.createObjectURL(blob);
-                
-                // Créer un élément HTML pour le téléchargement
-                const downloadLink = document.createElement('a');
-                downloadLink.style.display = 'none';
-                downloadLink.href = url;
-                downloadLink.download = `x-media-${quality}-${index}${extension}`;
-                
-                // Ajouter un message d'instruction pour iOS
-                const iosInstructions = document.createElement('div');
-                iosInstructions.innerHTML = `
-                    <div style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); 
-                               background: rgba(0,0,0,0.9); padding: 20px; border-radius: 10px; z-index: 9999;
-                               color: white; text-align: center; max-width: 80%;">
-                        <p>Pour sauvegarder la vidéo :</p>
-                        <p>1. Appuyez longuement sur la vidéo</p>
-                        <p>2. Sélectionnez "Télécharger la vidéo"</p>
-                        <button onclick="this.parentElement.remove()" 
-                                style="background: #1DA1F2; border: none; color: white; 
-                                       padding: 10px 20px; border-radius: 5px; margin-top: 10px;">
-                            Compris
-                        </button>
-                    </div>
-                `;
-                document.body.appendChild(iosInstructions);
-                
-                // Ajouter le lien et déclencher le clic
-                document.body.appendChild(downloadLink);
-                downloadLink.click();
-                
-                // Nettoyer
-                setTimeout(() => {
-                    window.URL.revokeObjectURL(url);
-                    downloadLink.remove();
-                }, 100);
-            } catch (error) {
-                console.error('Erreur iOS:', error);
-                alert('Erreur lors du téléchargement. Veuillez réessayer.');
-            }
-            downloadButton.innerHTML = originalText;
-            downloadButton.disabled = false;
-            return;
-        }
-        
-        // Pour les appareils mobiles Android
-        if (/Android/.test(navigator.userAgent)) {
-            try {
-                const fileName = `x-media-${quality}-${index}${extension}`;
-                const file = new File([blob], fileName, { type: response.headers.get('content-type') });
-                
                 if (navigator.canShare && navigator.canShare({ files: [file] })) {
                     await navigator.share({
                         files: [file],
@@ -880,7 +885,9 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
             } catch (err) {
                 saveFile(blob, quality, index, extension);
             }
-        } else {
+        }
+        // Pour Desktop
+        else {
             saveFile(blob, quality, index, extension);
         }
 
@@ -899,7 +906,7 @@ async function downloadVideo(videoUrl, quality, index, type = 'video') {
 
     } catch (error) {
         console.error('Erreur de téléchargement:', error);
-        alert('Erreur lors du téléchargement du média');
+        alert('Erreur lors du téléchargement du média. Veuillez réessayer.');
         const downloadButton = event.target.closest('.btn');
         downloadButton.innerHTML = originalText;
         downloadButton.disabled = false;
